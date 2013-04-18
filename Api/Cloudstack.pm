@@ -522,13 +522,27 @@ sub _debug {
 
 Api::Cloudstack requires the following modules on your system:
 
-=over 4
+=over 2
 
-=item * JSON::XS
-=item * LWP::UserAgent
-=item * URI::Escape
-=item * Digest::SHA
-=item * MIME::Base64
+=item * 
+
+JSON::XS
+
+=item * 
+
+LWP::UserAgent
+
+=item * 
+
+URI::Escape
+
+=item * 
+
+Digest::SHA
+
+=item * 
+
+MIME::Base64
 
 =back
 
