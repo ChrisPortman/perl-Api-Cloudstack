@@ -1,0 +1,186 @@
+=head1 NAME
+
+Api::Cloudstack
+
+=head1 VERSION
+
+Version 0.01
+
+=head1 SYNOPSIS
+
+  my $cloud  = Api::Cloudstack->new( 
+      'cloudServer' => 'cloudmgmt.mycorp.com',
+      'apikey'      => 'your_users_key',
+      'secret'      => 'your_users_secret',
+
+      'port'        => '443', #Optional, defaults to 80 or 443 if ssl=>1                     
+      'ssl'         => 1,     #Optional
+      'debug'       => 1,     #Noisy logging
+  );
+  
+  my $user = $cloud->createAccount(
+      username  => 'userBob',
+      password  => 'bobspass',
+      firstname => 'Bob',
+      lastname  => 'Smith',
+      email     => 'bob@mymail.com',
+  );
+
+=head1 DESCRIPTION
+
+This module provides an OO interface to the Cloudstack API.  Documentation
+on the API can be found here:
+
+L<http://cloudstack.apache.org/docs/api/apidocs-4.0.0/TOC_Root_Admin.html>
+
+The genericCall method is the real workhorse of this module.  Theoretically
+all API interfaces can be used directly via genericCall, however, abstracted
+methods for specific API interfaces, where provided, will apply validation
+and sensible returns based on the purpose of the interface.
+
+=head1 DIAGNOSTICS
+
+All methods from this module should return undef when a failure occurs.
+Your application should check for a true response and use the B<error>
+method to retrieve the latest error message.  See the documentation for
+the B<error> method below.
+
+=head1 METHODS
+
+=head2 new
+
+Create a new Api::Cloudstack object:
+
+  my $cloud  = Api::Cloudstack->new( 
+      'cloudServer' => 'cloudmgmt.mycorp.com',
+      'apikey'      => 'your_users_key',
+      'secret'      => 'your_users_secret',
+
+      'port'        => '443', #Optional, defaults to 8080 or 8096 if ssl=>1                     
+      'ssl'         => 1,     #Optional
+      'debug'       => 1,     #Noisy logging
+  );
+
+=head3 Parameters
+
+B<cloudServer> (required), is the address of the management console.
+
+B<apikey> (required), is your users API key used to authorise the use of 
+the API.  This is transmitted as part of the API uri.
+
+B<secret> (required), is your users API secret used to authenticate the
+API call.  The api uri is signed with this and is not transmitted.
+
+B<port> (optional), the network port the management server listens on for
+API calls.  Defaults to 8080 if not using SSL or 8096 if using SSL.
+
+B<ssl> (optional), turns on the use of SSL.  Default is off.  Boolean.
+
+B<debug> (optional), turns on debugging output to STDOUT.  Default is off Boolean.
+
+=head2 createAccount
+
+Creat an account in cloudstack
+
+  my $user = $cloud->createAccount(
+      username  => 'userBob',
+      password  => 'bobspass',
+      firstname => 'Bob',
+      lastname  => 'Smith',
+      email     => 'bob@mymail.com',
+  );
+
+=head3 Parameters
+
+All parameters are required and self-explanitory.  All values are scalars.
+
+=head2 createProject
+
+Creat a project in cloudstack
+
+  my $project = $cloud->createProject(
+      name        => 'myname',
+      displaytext => 'This describes my project',
+      account     => 'Owner',
+      domainid    => 'Domain id of the account',
+  );
+
+=head3 Parameters
+
+B<name> (required) is the name of the project.
+
+B<displaytext> (required) is the description.
+
+B<account> (optional) is the account who will be the administrator of the project.
+
+B<domain> (optional) is the domain to look in for the account.  Defaults to the Root domain.
+While this is technically optional, if you specify an account and that account is not in 
+the Root domain, this becomes mandatory.
+
+=head2 genericCall
+
+This method is used by the other methods to actually make the calls to
+the API, but can also be used directly where an abstracted method does not
+exist for the API interface you want to use.
+
+  my $result = $cloud->genericCall(
+      command => 'apiInterfaceName',
+      %argsAsPerApiRequirements,
+  );
+
+=head3 Parameters
+
+The only required parameter is B<command> which is the name of the 
+API interface as per the API documentation.  All other parameters depend
+on the API interface being used.
+
+The keys for the additional parameters should be the parameter names 
+exactly as per the API documentation as they will be passed verbatim.  
+
+No validation of parameters or their values will be done here, that work
+should be done in the abstracted API interface methods or, where one
+doesn't exist, in the application code.
+
+=head2 error
+
+All methods, upon encountering an error should set an error state and
+then return undef.
+
+Your application should check each method call for a true return.  If it
+does not get one, it can use the error method to retrieve the last error
+encountered.
+
+  unless ( $cloud->someMethod(...) ) {
+      my $error = $cloud->error();
+      die $error;
+  }
+
+=head1 CONFIGURATION AND ENVIRONMENT
+
+
+
+=head1 DEPENDENCIES
+
+Api::Cloudstack requires the following modules on your system:
+  - JSON::XS
+  - LWP::UserAgent
+  - URI::Escape
+  - Digest::SHA
+  - MIME::Base64
+
+=head1 INCOMPATIBILITIES
+
+
+
+=head1 BUGS AND LIMITATIONS
+
+
+
+=head1 AUTHOR
+
+Chris Portman
+
+=head1 LICENSE AND COPYRIGHT
+
+General open source license applies.
+
