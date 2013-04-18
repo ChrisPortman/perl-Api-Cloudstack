@@ -521,11 +521,16 @@ sub _debug {
 =head1 DEPENDENCIES
 
 Api::Cloudstack requires the following modules on your system:
-  - JSON::XS
-  - LWP::UserAgent
-  - URI::Escape
-  - Digest::SHA
-  - MIME::Base64
+
+=over 4
+
+=item * JSON::XS
+=item * LWP::UserAgent
+=item * URI::Escape
+=item * Digest::SHA
+=item * MIME::Base64
+
+=back
 
 =head1 INCOMPATIBILITIES
 
