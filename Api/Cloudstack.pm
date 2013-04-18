@@ -355,6 +355,7 @@ sub genericCall {
             };
             if ($@) {
                 $self->error( "API call did not return a valid JSON string" );
+                return;
             }
         }
 
