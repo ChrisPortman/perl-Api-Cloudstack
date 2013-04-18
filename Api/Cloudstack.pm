@@ -307,8 +307,10 @@ sub genericCall {
     my %args = $self->_processArgs( 'genericCall', @_ )
       or return;
 
-    $args{'command'}
-      or croak "No command supplied to genericCall";
+    unless ( $args{'command'} ) {
+        $self->error('No command supplied to genericCall');
+        return;
+    }
 
     # Add the respose type and API key to the list of call args
     $args{'response'} = 'json';
@@ -373,10 +375,11 @@ sub genericCall {
             return $decoded;
         }
         else {
-            croak 'Recieved a failure attempting to call the API on '
-                  .$self->{'cloudServer'}
-                  .': '
-                  .$result->status_line;
+            $self->error( 'Recieved a failure attempting to call the API on '
+              .$self->{'cloudServer'}
+              .': '
+              .$result->status_line
+            );
             return;
         }
     }
