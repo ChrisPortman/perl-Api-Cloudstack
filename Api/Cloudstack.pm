@@ -215,6 +215,75 @@ sub createAccount {
     return $result;
 }
 
+=head2 listAccounts
+
+Return a list of hash refs detailing each account.  
+
+  my @accounts = $cloud->listAccounts();
+
+head3 Parameters
+
+B<accounttype> (optional) List accounts by account type. Valid account types are 1 (admin), 2 (domain-admin), and 0 (user). Appears to default to "user" within the api if not specified.
+B<domainid> (optional) list only resources belonging to the domain specified
+B<id> (optional) list account by account ID
+B<iscleanuprequired> (optional) list accounts by cleanuprequred attribute (values are true or false)
+B<isrecursive> (optional) defaults to false, but if true, lists all resources from the parent specified by the domainId till leaves.
+B<keyword> (optional) List by keyword
+B<name> (optional) list account by account name
+B<state> (optional) list accounts by state. Valid states are enabled, disabled, and locked.
+
+B<listall> (implied) This is hard set to true.  This is because it makes sense that you would want all you can get plus, there appears to be a bug in the API where, although no parameters are required, if you submit no parameters, you get no results.  This ensures that you get results.
+
+=cut
+
+sub listAccounts {
+    my $self = shift;
+    my %args = $self->_processArgs( 'listAccounts', @_ );
+    
+    #Enforce the required params
+    $args{'listall'} = 'true';
+
+    #Allow the account type to use the numerical vals as per the API
+    #or our abstractions.
+    unless ( defined $args{'accounttype'} and $args{'accounttype'} =~ /^[012]$/ )
+    {
+        $args{'accounttype'} =
+            (not $args{'accounttype'}) 
+              || ( lc($args{'accounttype'})    eq 'user')       ? '0'
+          : lc($args{'accounttype'})           eq 'rootadmin'   ? '1' 
+          : lc($args{'accounttype'})           eq 'domainadmin' ? '2'
+          : die "Something really wrong"
+          ;
+    }
+    
+    my %validParams = (
+        'accounttype'       => qr/^(?:[012]|user|rootadmin|domainadmin)$/i,
+        'domainid'          => qr/^[a-z0-9\-]+/i,
+        'id'                => qr/^[a-z0-9\-]+/i,
+        'iscleanuprequired' => qr/^(?:true|false)$/i,
+        'isrecursive'       => qr/^(?:true|false)$/i,
+        'keyword'           => qr/^[a-z0-9\-]+/i,
+        'name'              => qr/^(?:[a-z'\s]+)$/i,
+        'state'             => qr/^(?:enabled|disabled|locked)/,
+        'listall'           => qr/^true$/,
+    );
+    $self->_validateParams('listAccounts', \%args,\%validParams)
+      or return;
+    
+    my $result = $self->genericCall(
+        'command' => 'listAccounts',
+        %args,
+    );
+    
+    my @results;
+    
+    if ($result->{listaccountsresponse}->{account}) {
+        push @results, @{$result->{listaccountsresponse}->{account}};
+    }
+
+    return @results;
+}
+
 =head2 createProject
 
 Creat a project in cloudstack
@@ -274,6 +343,116 @@ sub createProject {
     );
     
     return $result;
+}
+
+=head2 listProjects
+
+Return a list of hashes containting details of all projects.
+
+  my @projects = $cloud->listProjects();
+  
+=head3 Parameters
+
+
+
+=cut
+
+sub listProjects {
+    my $self = shift;
+    my %args = $self->_processArgs( 'listProjects', @_ );
+    
+    #Enforce the required params
+    $args{'listall'} = 'true';
+
+    my %validParams = (
+        'account'           => qr/^(?:[a-z'\s]+)$/i,
+        'displaytext'       => qr/^.+/,
+        'domainid'          => qr/^[a-z0-9\-]+/i,
+        'id'                => qr/^[a-z0-9\-]+/i,
+        'isrecursive'       => qr/^(?:true|false)$/i,
+        'keyword'           => qr/^[a-z0-9\-]+/i,
+        'name'              => qr/^(?:[a-z'\s]+)$/i,
+        'tags'              => qr/^[a-z0-9\-\s]+/i,
+        'state'             => qr/^.+/,
+        'listall'           => qr/^true$/,
+    );
+    $self->_validateParams('listProjects', \%args,\%validParams)
+      or return;
+    
+    my $result = $self->genericCall(
+        'command' => 'listProjects',
+        %args,
+    );
+
+    my @results;
+    
+    if ($result->{listprojectsresponse}->{project}) {
+        push @results, @{$result->{listprojectsresponse}->{project}};
+    }
+
+    return @results;
+}
+
+=head2 listSnapshots
+
+Return a list of hashes containing the details of all the snapshots.
+
+  my @snapshots = $cloud->listSnapshots();
+  
+=head3 Parameters
+
+B<account> (optional) List resources by account. Must be used with the domainId parameter.
+B<domainid> (optional) list only resources belonging to the domain specified
+B<id> (optional) list account by account ID
+B<intervaltype> (optional) valid values are HOURLY, DAILY, WEEKLY, and MONTHLY.
+B<isrecursive> (optional) defaults to false, but if true, lists all resources from the parent specified by the domainId till leaves.
+B<keyword> (optional) List by keyword
+B<name> (optional) list snapshots by snapshot name
+B<projectid> (optional) list snapshots by project.
+B<snapshottype> (optional) valid values are MANUAL or RECURRING.
+B<tags> (optional) List resources by tags (key/value pairs)
+B<volumeid> (optional) the ID of the disk volume.
+
+B<listall> (implied) This is hard set to true.  This is because it makes sense that you would want all you can get plus, there appears to be a bug in the API where, although no parameters are required, if you submit no parameters, you get no results.  This ensures that you get results.
+
+=cut
+
+sub listSnapshots {
+    my $self = shift;
+    my %args = $self->_processArgs( 'listSnapshots', @_ );
+    
+    #Enforce the required params
+    $args{'listall'} = 'true';
+
+    my %validParams = (
+        'account'           => qr/^(?:[a-z'\s]+)$/i,
+        'domainid'          => qr/^[a-z0-9\-]+/i,
+        'id'                => qr/^[a-z0-9\-]+/i,
+        'intervaltype'      => qr/^(?:HOURLY|DAILY|WEEKLY|MONTHLY)$/,
+        'isrecursive'       => qr/^(?:true|false)$/i,
+        'keyword'           => qr/^[a-z0-9\-]+/i,
+        'name'              => qr/^(?:[a-z'\s]+)$/i,
+        'projectid'         => qr/^[a-z0-9\-]+/i,
+        'snapshottype'      => qr/^(?:MANUAL|RECURRING)$/,
+        'tags'              => qr/^[a-z0-9\-\s]+/i,
+        'volumeid'          => qr/^[a-z0-9\-]+/i,
+        'listall'           => qr/^true$/,
+    );
+    $self->_validateParams('listSnapshots', \%args,\%validParams)
+      or return;
+    
+    my $result = $self->genericCall(
+        'command' => 'listSnapshots',
+        %args,
+    );
+
+    my @results;
+    
+    if ($result->{listsnapshotsresponse}->{snapshot}) {
+        push @results, @{$result->{listsnapshotsresponse}->{snapshot}};
+    }
+
+    return @results;
 }
 
 =head2 genericCall
@@ -342,7 +521,10 @@ sub genericCall {
     my $can_accept = HTTP::Message::decodable;
     my $ua = LWP::UserAgent->new();
     $ua->default_header('Accept-Encoding' => $can_accept);
-    $ua->ssl_opts(verify_hostname => 0);
+    
+    if ($LWP::UserAgent::VERSION >= 5.837) {
+        $ua->ssl_opts(verify_hostname => 0);
+    }
         
     my $request = HTTP::Request->new(GET => $url);
     my $result  = $ua->request($request);
@@ -457,9 +639,9 @@ sub _processArgs {
     $method
       or ($self->error("Internal error: _processArgs called without method name") and return);
     @args
-      or ($self->error("Internal error: _processArgs called without args") and return);
+      or return;
     
-    if ( $args[1] ) {
+    if ( defined $args[1] ) {
         #Args supplied as a list
         #Check for even number of elements and cast as a hash.
         for my $elem (@args) {
