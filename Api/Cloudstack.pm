@@ -224,12 +224,19 @@ Return a list of hash refs detailing each account.
 head3 Parameters
 
 B<accounttype> (optional) List accounts by account type. Valid account types are 1 (admin), 2 (domain-admin), and 0 (user). Appears to default to "user" within the api if not specified.
+
 B<domainid> (optional) list only resources belonging to the domain specified
+
 B<id> (optional) list account by account ID
+
 B<iscleanuprequired> (optional) list accounts by cleanuprequred attribute (values are true or false)
+
 B<isrecursive> (optional) defaults to false, but if true, lists all resources from the parent specified by the domainId till leaves.
+
 B<keyword> (optional) List by keyword
+
 B<name> (optional) list account by account name
+
 B<state> (optional) list accounts by state. Valid states are enabled, disabled, and locked.
 
 B<listall> (implied) This is hard set to true.  This is because it makes sense that you would want all you can get plus, there appears to be a bug in the API where, although no parameters are required, if you submit no parameters, you get no results.  This ensures that you get results.
@@ -353,7 +360,7 @@ Return a list of hashes containting details of all projects.
   
 =head3 Parameters
 
-
+TODO
 
 =cut
 
@@ -402,15 +409,25 @@ Return a list of hashes containing the details of all the snapshots.
 =head3 Parameters
 
 B<account> (optional) List resources by account. Must be used with the domainId parameter.
+
 B<domainid> (optional) list only resources belonging to the domain specified
+
 B<id> (optional) list account by account ID
+
 B<intervaltype> (optional) valid values are HOURLY, DAILY, WEEKLY, and MONTHLY.
+
 B<isrecursive> (optional) defaults to false, but if true, lists all resources from the parent specified by the domainId till leaves.
+
 B<keyword> (optional) List by keyword
+
 B<name> (optional) list snapshots by snapshot name
+
 B<projectid> (optional) list snapshots by project.
+
 B<snapshottype> (optional) valid values are MANUAL or RECURRING.
+
 B<tags> (optional) List resources by tags (key/value pairs)
+
 B<volumeid> (optional) the ID of the disk volume.
 
 B<listall> (implied) This is hard set to true.  This is because it makes sense that you would want all you can get plus, there appears to be a bug in the API where, although no parameters are required, if you submit no parameters, you get no results.  This ensures that you get results.
